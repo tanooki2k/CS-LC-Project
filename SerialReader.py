@@ -23,17 +23,26 @@ class SerialReader:
         self.period = period
         self.epsilon = epsilon
         self.expr = expr
+        self.__fieldnames = fieldnames
 
 
     def process_data(self) -> None:
         while True:
             raw_record = self.raw_data.get()
-            arrays = list(zip(*raw_record))
-            process_record = [median(col) for col in arrays]
-            self.processed_data.put()
+            if raw_record:
+                arrays = list(zip(*raw_record))
+
+                if len(arrays) == len(self.__fieldnames) - 1:
+                    process_record = [time.time()] + [median(col) for col in arrays]
+                    final_record =  {key: value for key, value in zip(self.__fieldnames, process_record)}
+                    self.processed_data.put(final_record)
+                    print(final_record)
 
 
     def read(self):
+        thread = Thread(target=self.process_data, daemon=True)
+        thread.start()
+
         start_time = time.time()
         raw_record = []
 
@@ -46,11 +55,11 @@ class SerialReader:
                     raw_record.append(data)
             else:
                 if raw_record:
-                    self.raw_data.put(raw_record)
                     print(raw_record)
+                    self.raw_data.put(raw_record)
                     raw_record = []
 
 
 if __name__ == "__main__":
-    serial = SerialReader(5, 1.5, r"^[0-9]+,[0-9]+$")
+    serial = SerialReader(10, 4, ["utc", "temperature", "moisture"], r"^[0-9]+,[0-9]+$")
     serial.read()
