@@ -1,4 +1,4 @@
-from typing import List, Tuple, Any
+from typing import Tuple
 from matplotlib.pyplot import plot, show
 from Graphing import MatplotlibGraph
 from Tools.FloatRange import float_range
@@ -7,24 +7,28 @@ from Tools.FloatRange import float_range
 class AnalogGraph(MatplotlibGraph):
     x, y = [], []
 
-    def __init__(self, data: List[Tuple[Any, Any]] = None) -> None:
-        for elem in data:
-            if len(elem) != 2:
+    def __init__(self, fieldnames: Tuple[str, str], data = None) -> None:
+        self.fieldnames = fieldnames
+
+        while not data.empty():
+            row = data.get()
+            record = []
+            while not row.empty():
+                elem = row.get()
+                record.append(elem)
+
+            if len(record) != 2:
                 raise ValueError("All elements must be pairs `(x, y)`")
 
-        for record in data:
             self.new_record(record)
 
-    def new_record(self, queue_record) -> None:
-        record = []
-        while not queue_record.empty():
-            elem = queue_record.get()
-            record.append(elem)
-
+    def new_record(self, record) -> None:
         if len(record) != 2:
+            print(record)
             raise ValueError("Argument list `record` must have length 2")
 
         new_x, new_y = record
+        print(record)
         self.x.append(new_x)
         self.y.append(new_y)
 
@@ -42,14 +46,24 @@ class AnalogGraph(MatplotlibGraph):
 
 
 if __name__ == '__main__':
+    from queue import Queue
     from math import sin
+
+    data_queue = Queue()
 
     t = [num for num in float_range(-10, 10, 0.001)]
     func_x = lambda x: sin(x)
     func_y = lambda y: y ** 2
 
-    x = [func_x(i) for i in t]
-    y = [func_y(j) for j in t]
+    x_col = [func_x(i) for i in t]
+    y_col = [func_y(j) for j in t]
 
-    graph = AnalogGraph(list(zip(x, y)))
+    for i in range(len(t)):
+        new_queue = Queue()
+        new_queue.put(x_col[i])
+        new_queue.put(y_col[i])
+
+        data_queue.put(new_queue)
+
+    graph = AnalogGraph(data=data_queue, fieldnames=("x", "y"))
     graph.show()

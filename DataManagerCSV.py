@@ -44,7 +44,9 @@ class DataManagerCSV(FileManager):
             
             for r in records:
                 if list(r.keys()) == self.__fieldnames:
-                    if validate: valid_data.append(list(r.values()))
+                    if validate:
+                        new_record = [r[k] for k in self.__fieldnames]
+                        valid_data.append(new_record)
                     writer.writerow(r)
 
             if validate: return valid_data
@@ -55,7 +57,7 @@ class DataManagerCSV(FileManager):
     
 
 if __name__ == "__main__":
-    database = DataManagerCSV("data", ["name", "age"])
+    database = DataManagerCSV("names", ["name", "age"])
 
     record = {"name": "Mateo", "age": 21}
     database.write(record)
