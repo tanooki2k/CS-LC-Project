@@ -8,7 +8,6 @@ import serial
 import mb_detect
 
 
-
 class SerialReader:
     raw_data = Queue()
     processed_data = Queue()
@@ -50,7 +49,7 @@ class SerialReader:
         raw_record = []
 
         while True:
-            line = self.serial.readline().decode().strip()
+            line = self.serial.readline().decode(errors="ignore").strip()
             delta = (time.time() - start_time) % self.period
             if delta < self.epsilon or delta > self.period - self.epsilon:
                 if re.search(self.expr, line):
@@ -64,5 +63,5 @@ class SerialReader:
 
 
 if __name__ == "__main__":
-    serial = SerialReader(10, 4, ["utc", "temperature", "moisture"], r"^[0-9]+,[0-9]+$")
+    serial = SerialReader(10, 4, ["utc", "temp", "moist"], r"^[0-9]+,[0-9]+$")
     serial.read(lambda : None)

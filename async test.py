@@ -1,4 +1,3 @@
-import asyncio
 from time import sleep
 from queue import Queue
 from statistics import median
@@ -14,7 +13,7 @@ def data_collector():
     while True:
         lst = queue.get()
         new_elem = get_median(lst)
-        data.put(new_elem)
+        data.put(round(new_elem, 2))
 
 def data_printer():
     while True:
