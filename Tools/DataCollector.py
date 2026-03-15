@@ -48,7 +48,7 @@ class DataCollector:
 
         for r in record:
             for g in self.__grapher:
-                new_record = [r[k] for k in g.fieldnames]
+                new_record = [r[k] for k in g.field]
                 g.new_record(new_record)
 
 
