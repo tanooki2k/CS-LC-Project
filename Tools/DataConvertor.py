@@ -11,7 +11,10 @@ def convert_data(d: List[Dict[str, str]], p: List[Tuple[str, str]]) -> List[Queu
         for key, val in dic.items():
             for index, pair in enumerate(p):
                 if key in pair:
-                    sub_queues[index].put(float(val))
+                    try:
+                        sub_queues[index].put(float(val))
+                    except ValueError:
+                        sub_queues[index].put(val)
 
         for index, sb in enumerate(sub_queues):
             subdata[index].put(sb)

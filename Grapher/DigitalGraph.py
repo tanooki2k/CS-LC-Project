@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Tuple
 from datetime import datetime
 from random import randint
-from matplotlib.pyplot import plot, show, savefig
+from matplotlib.pyplot import plot, show, savefig, close
 from Grapher.Graphing import MatplotlibGraph
 
 
@@ -57,7 +57,7 @@ class DigitalGraph(MatplotlibGraph):
             output_dir.mkdir(parents=True, exist_ok=True)
 
             self.save(output_dir)
-        show()
+        close()
 
     @staticmethod
     def save(path):

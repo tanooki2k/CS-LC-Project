@@ -9,29 +9,39 @@ from random import randint
 
 
 class DataCollector:
-    def __init__(self, filename: str, fieldnames: List[str], pairs_fieldnames: List[Tuple[str, str]]):
+    def __init__(self, filename: str, fieldnames: List[str], pairs_fieldnames: List[Tuple[str, str]], is_digital: List[bool]):
+        if len(pairs_fieldnames) != len(is_digital):
+            raise ValueError("pairs_fieldnames and is_digital attributes are not of same length.")
+
         self.__start_time = time.time()
 
         self.__filename = filename
         self.__fieldnames = fieldnames
         self.__database = DataManagerCSV(filename, fieldnames)
+        self.__grapher = []
 
         raw_data = self.__database.read()
         data = convert_data(raw_data, pairs_fieldnames)
-        self.__grapher = [
-            AnalogGraph(fieldnames=pairs_fieldnames[0], data=data[0]),
-            DigitalGraph(fieldnames=pairs_fieldnames[1], data=data[1])
-        ]
+
+        for i, g_type in enumerate(is_digital):
+            if g_type:
+                new_graph = DigitalGraph(fieldnames=pairs_fieldnames[i], data=data[i])
+            else:
+                new_graph = AnalogGraph(fieldnames=pairs_fieldnames[i], data=data[i])
+            self.__grapher.append(new_graph)
 
     def read(self):
         return self.__database.read()
 
-    def plot(self, period: float, can_save: bool = False) -> None:
+    def plot_each(self, period: float, can_save: bool = False) -> None:
         delta = time.time() - self.__start_time
         if delta >= period:
-            for g in self.__grapher:
-                g.show(can_save=can_save)
-            self.__start_time = time.time()
+            self.plot(can_save)
+
+    def plot(self, can_save: bool):
+        for g in self.__grapher:
+            g.show(can_save=can_save)
+        self.__start_time = time.time()
 
     def new_record(self, *record: Dict[str, str]) -> None:
         self.__database.write(*record, validate=False)
@@ -43,9 +53,9 @@ class DataCollector:
 
 
 if __name__ == "__main__":
-    numbers_data = DataCollector(os.path.join("..", "data"), ["t", "x", "y"], [("t", "x"), ("t", "y")])
+    numbers_data = DataCollector(os.path.join("..", "data"), ["t", "x", "y"], [("t", "x"), ("t", "y")], [False, True])
     length = len(numbers_data.read())
-    numbers_data.plot(0, can_save=True)
+    numbers_data.plot(can_save=True)
 
     # new_data = [
     #     {"t": length + i, "x": 2 * (length + i + 1) + randint(-10, 10), "y": 2 * (length + i + 1) + randint(-10, 10)} for i in range(randint(5, 20))

@@ -3,6 +3,7 @@
 import argparse
 from serial.serialutil import SerialException
 from Tools.SerialReader import SerialReader
+from Tools.DataSetReader import read_dataset
 
 
 def main():
@@ -60,6 +61,8 @@ def main():
     else:
         print("The program has been initialised as Simulation mode.")
         print(f"Reading data from: {args.dataset}")
+        read_dataset(args.dataset)
+
 
 
 if __name__ == "__main__":

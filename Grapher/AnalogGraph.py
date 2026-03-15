@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 from typing import Tuple
-from matplotlib.pyplot import plot, show, savefig
+from matplotlib.pyplot import plot, show, savefig, close
 from Grapher.Graphing import MatplotlibGraph
 
 
@@ -45,7 +45,7 @@ class AnalogGraph(MatplotlibGraph):
             output_dir.mkdir(parents=True, exist_ok=True)
 
             self.save(output_dir)
-        show()
+        close()
 
     @staticmethod
     def save(path):
