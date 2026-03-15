@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
-
 from serial.serialutil import SerialException
-
-from SerialReader import SerialReader
+from Tools.SerialReader import SerialReader
 
 
 def main():
@@ -48,8 +46,6 @@ def main():
         print("Verbose mode enabled")
         print(f"Current mode is {args.mode}")
 
-    if args.dataset:
-        print(f"Reading data from: {args.dataset}")
 
     print(f"Sampling interval: {args.interval} hours")
 
@@ -63,7 +59,7 @@ def main():
             serial_reader.read(lambda: None)
     else:
         print("The program has been initialised as Simulation mode.")
-        # 20260315_162100.png
+        print(f"Reading data from: {args.dataset}")
 
 
 if __name__ == "__main__":

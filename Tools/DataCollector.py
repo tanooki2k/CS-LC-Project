@@ -42,7 +42,7 @@ class DataCollector:
 
 
 if __name__ == "__main__":
-    numbers_data = DataCollector("data", ["t", "x", "y"], [("t", "x"), ("t", "y")])
+    numbers_data = DataCollector("../data", ["t", "x", "y"], [("t", "x"), ("t", "y")])
     length = len(numbers_data.read())
     numbers_data.plot(0)
 
