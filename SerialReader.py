@@ -2,6 +2,7 @@ from statistics import median
 from threading import Thread
 from typing import List, Tuple
 from queue import Queue
+import datetime
 import time
 import re
 import serial
@@ -33,8 +34,10 @@ class SerialReader:
             if raw_record:
                 arrays = list(zip(*raw_record))
 
+                now = datetime.datetime.now()
+                formatted = now.strftime("%Y-%m-%d %H:%M:%S")
                 if len(arrays) == len(self.__fieldnames) - 1:
-                    process_record = [time.time()] + [median(col) for col in arrays]
+                    process_record = [formatted] + [bool(median(col)) if self.__is_digital[i+1] else int(median(col)) for i, col in enumerate(arrays)]
                     final_record =  {key: value for key, value in zip(self.__fieldnames, process_record)}
                     self.processed_data.put(final_record)
                     data_str = ", ".join([f"{f}: {final_record[f]}" for f in self.__fieldnames])
@@ -61,6 +64,7 @@ class SerialReader:
             else:
                 if raw_record:
                     if self.__verb: print(f"Raw Input read: {raw_record}")
+                    print(f"Raw data length: {len(raw_record)}")
                     self.raw_data.put(raw_record)
                     raw_record = []
 
