@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, List, Any
+from typing import Dict, List, Any
 import matplotlib.pyplot as plt
 from pathlib import Path
 from datetime import datetime
@@ -11,7 +11,10 @@ class MultiAxesGraph(MatplotlibGraph):
     __TEMP_TAG = "Temperature (°C)"
     __RISK_TAG = "Risk (0% - 100%)"
 
-    def __init__(self, fieldnames: Tuple[str, str, str, str], data: List[Dict[str, Any]] = None) -> None:
+    def __init__(self, fieldnames: List[str], data: List[Dict[str, Any]] = None) -> None:
+        if len(fieldnames) != 4:
+            raise AttributeError(f"Fieldnames must have 4 element, just {len(fieldnames)} has been provided.")
+
         self.fig, self.ax1 = plt.subplots()
         self.ax2 = self.ax1.twinx()
         self.fieldnames = fieldnames
@@ -66,18 +69,21 @@ class MultiAxesGraph(MatplotlibGraph):
         labels = [l.get_label() for l in lines]
         self.ax1.legend(lines, labels, loc="upper right")
 
-    def show(self, record=None, can_save: bool = False):
+    def show(self, record=None, can_save: bool = False, path:str =""):
         if record is not None:
             self.new_record(record)
 
         self.plot()
 
         if can_save:
-            output_dir = Path("..") / "Output"
-            output_dir.mkdir(parents=True, exist_ok=True)
+            output_dir = Path(path)
+            if not path:
+                output_dir = Path("..") / "Output"
+                output_dir.mkdir(parents=True, exist_ok=True)
 
             self.save(output_dir)
-        plt.show()
+        else:
+            plt.show()
         plt.close()
 
     @staticmethod
@@ -106,7 +112,7 @@ if __name__ == "__main__":
 
     raw_data = list(zip(hours, temperature, moisture, risk))
 
-    field = ("utc", "temperature", "moisture", "risk")
+    field = ["utc", "temperature", "moisture", "risk"]
     dict_data = [{field[j]: raw_data[i][j] for j in range(len(field))} for i in hours]
     print(dict_data)
 

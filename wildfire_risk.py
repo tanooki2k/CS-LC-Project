@@ -61,7 +61,7 @@ def main():
     else:
         print("The program has been initialised as Simulation mode.")
         print(f"Reading data from: {args.dataset}")
-        read_dataset(args.dataset)
+        read_dataset(args.dataset, [False, False, True, False], args.verbose)
 
 
 
