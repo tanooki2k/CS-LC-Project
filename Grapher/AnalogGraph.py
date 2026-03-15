@@ -1,12 +1,13 @@
+from datetime import datetime
 from typing import Tuple
-from matplotlib.pyplot import plot, show
+from matplotlib.pyplot import plot, show, savefig
 from Grapher.Graphing import MatplotlibGraph
 
 
 class AnalogGraph(MatplotlibGraph):
     x, y = [], []
 
-    def __init__(self, fieldnames: Tuple[str, str], data = None) -> None:
+    def __init__(self, fieldnames: Tuple[str, str], data=None) -> None:
         self.fieldnames = fieldnames
 
         while data is not None and not data.empty():
@@ -32,14 +33,21 @@ class AnalogGraph(MatplotlibGraph):
     def plot(self) -> None:
         plot(self.x, self.y)
 
-    def show(self, record = None) -> None:
-        if record is None:
-            self.plot()
-            show()
-        else:
+    def show(self, record=None, can_save: bool = False) -> None:
+        if record is not None:
             self.new_record(record)
-            self.plot()
-            show()
+
+        self.plot()
+
+        if can_save:
+            self.save("../Output/")
+        show()
+
+    @staticmethod
+    def save(path, ext="png"):
+        now = datetime.now()
+        formatted = now.strftime("%Y%m%d_%H%M%S")
+        savefig(path + formatted + "." + ext)
 
 
 if __name__ == '__main__':
@@ -64,4 +72,4 @@ if __name__ == '__main__':
         data_queue.put(new_queue)
 
     graph = AnalogGraph(data=data_queue, fieldnames=("x", "y"))
-    graph.show()
+    graph.show(can_save=True)

@@ -10,5 +10,10 @@ class MatplotlibGraph(ABC):
         pass
 
     @abstractmethod
-    def show(self, record=None):
+    def show(self, record=None, can_save:bool=False):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def save(path, ext="png"):
         pass
