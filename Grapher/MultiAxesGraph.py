@@ -1,5 +1,6 @@
 from typing import Dict, List, Any
 import matplotlib.pyplot as plt
+import matplotlib.dates as m_dates
 from pathlib import Path
 from datetime import datetime
 from Grapher.Graphing import MatplotlibGraph
@@ -12,12 +13,14 @@ class MultiAxesGraph(MatplotlibGraph):
     __RISK_TAG = "Risk (0% - 100%)"
     __min_temp_ax, __max_temp_ax = 10, 40
 
-    def __init__(self, fieldnames: List[str], data: List[Dict[str, Any]] = None, verbose: bool = False) -> None:
+    def __init__(self, fieldnames: List[str], data: List[Dict[str, Any]] = None, verbose: bool = False, title: str = "") -> None:
         if len(fieldnames) != 4:
             raise AttributeError(f"Fieldnames must have 4 element, just {len(fieldnames)} has been provided.")
 
-        self._fig, self.ax1 = plt.subplots()
-        self.ax1.tick_params(axis="x", rotation=45)
+        self._fig, self.ax1 = plt.subplots(figsize=(10, 5))
+        self.ax1.tick_params(axis="x", rotation=30)
+        self.ax1.set_title(title)
+        self.ax1.xaxis.set_major_formatter(m_dates.DateFormatter('%Y-%m-%d %H:%M:%S'))
         self._ax2 = self.ax1.twinx()
         self._fieldnames = fieldnames
         self._verbose = verbose
@@ -53,9 +56,10 @@ class MultiAxesGraph(MatplotlibGraph):
 
     def plot(self):
         self.ax1.set_ylim(self.__min_temp_ax - 2.5, self.__max_temp_ax + 2.5)
+        plt.tight_layout()
 
-        temp_line, = self.ax1.plot(self.time, self.temp, label=self.__TEMP_TAG, color="orange")
-        risk_line, = self._ax2.plot(self.time, self.risk, label=self.__RISK_TAG, color="blue")
+        temp_line, = self.ax1.plot(self.time, self.temp, label=self.__TEMP_TAG, color="orange", zorder=10)
+        risk_line, = self._ax2.plot(self.time, self.risk, label=self.__RISK_TAG, color="blue", zorder=15)
 
         time_true, time_false, temp_true, temp_false = [], [], [], []
         for i, m in enumerate(self.moist):
@@ -71,7 +75,8 @@ class MultiAxesGraph(MatplotlibGraph):
             temp_false,
             color="red",
             marker="x",
-            label="Moisture = False"
+            label="Moisture = False",
+            zorder=10
         )
 
         moist_true = self.ax1.scatter(
@@ -79,12 +84,13 @@ class MultiAxesGraph(MatplotlibGraph):
             temp_true,
             color="green",
             marker="o",
-            label="Moisture = True"
+            label="Moisture = True",
+            zorder=10
         )
 
         lines = [temp_line, risk_line, moist_false, moist_true]
         labels = [l.get_label() for l in lines]
-        self.ax1.legend(lines, labels, loc="upper right")
+        self.ax1.legend(lines, labels, loc="upper right", zorder=5)
 
     def show(self, record=None, can_save: bool = False, path:str =""):
         if record is not None:

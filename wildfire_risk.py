@@ -92,18 +92,18 @@ def start_realtime_mode(args: Namespace):
         data = None
         if len(read_data):
             print("Processing data...")
-            data = process_data(read_data=read_data, fieldnames=fieldnames, is_digital=is_digital)
+            data = process_data(read_data=read_data, is_digital=is_digital)
 
         if args.verbose:    print("Grapher is being initialised...")
-        grapher = MultiAxesGraph(fieldnames=fieldnames, data=data, verbose=args.verbose)
+        grapher = MultiAxesGraph(fieldnames=fieldnames, data=data, verbose=args.verbose, title="Real Time data")
 
         serial_reader.attach(observer=database)
         serial_reader.attach(observer=grapher)
 
         serial_reader.attach_graph(graph_observer=grapher)
 
-        grapher.show(can_save=True, path="Output")
-        # serial_reader.read()
+        # grapher.show(can_save=True, path="Output")
+        serial_reader.read()
 
 
 def start_simulation_mode(args: Namespace):

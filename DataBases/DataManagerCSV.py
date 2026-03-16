@@ -60,8 +60,8 @@ class DataManagerCSV(FileManager):
         self.write(new_record)
 
 
-def process_value(value: str, is_digital: bool, first_value):
-    from Tools.DatetimeFunctions import convert_to_hours, subtract_date
+def process_value(value: str, is_digital: bool):
+    from Tools.DatetimeFunctions import convert_to_date
 
     if is_digital:
         if value not in ["True", "False"]:
@@ -72,28 +72,19 @@ def process_value(value: str, is_digital: bool, first_value):
             return False
 
     elif is_digital is None:
-        return convert_to_hours(subtract_date(value, first_value))
+        return convert_to_date(value)
     else:
         return int(float(value))
 
 
-def process_records(read_data: List[Dict[str, str]], first_date, is_digital: List[bool]):
+def process_data(read_data: List[Dict[str, str]], is_digital: List[bool]):
     return [
         {
-            key: process_value(val, is_digital[i], first_date)
+            key: process_value(val, is_digital[i])
             for i, (key, val) in enumerate(d.items())
         }
         for d in read_data
     ]
-
-
-def process_data(read_data: List[Dict[str, str]], fieldnames: List[str], is_digital: List[bool]):
-    from Tools.DatetimeFunctions import convert_to_date
-
-    first_date = convert_to_date(read_data[0][fieldnames[0]])
-    data = process_records(read_data, first_date, is_digital)
-
-    return data
 
 
 if __name__ == "__main__":

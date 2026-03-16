@@ -49,7 +49,7 @@ class SerialReader(Subject):
         for graph_observer in self._graph_observers:
             graph_observer.show(can_save=True, path="Output")
 
-    def process_data(self) -> None:
+    def process_raw_data(self) -> None:
         start_time = time.time()
 
         while True:
@@ -79,7 +79,7 @@ class SerialReader(Subject):
 
 
     def read(self):
-        data_thread = Thread(target=self.process_data, daemon=True)
+        data_thread = Thread(target=self.process_raw_data, daemon=True)
         data_thread.start()
 
         start_time = time.time()

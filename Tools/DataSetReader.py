@@ -21,13 +21,14 @@ def read_dataset(path: str, is_digital: List[bool], verbose: bool = False):
         raise ValueError("No data has been found!")
 
     print("Processing data...")
-    data = process_data(read_data=read_data, fieldnames=fieldnames, is_digital=is_digital)
+    data = process_data(read_data=read_data, is_digital=is_digital)
     if verbose: print(*data, sep="\n")
 
     print("Initialising graph...")
     graph = MultiAxesGraph(
         fieldnames=fieldnames,
         data=data,
+        title=path,
     )
 
     print("Plotting graph...")
