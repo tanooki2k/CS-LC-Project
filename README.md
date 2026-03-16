@@ -1,99 +1,170 @@
-# Wildfire Risk Detection Model
+# 🔥 Wildfire Risk Detection Model
 
-This repository contains my **Leaving Cert Computer Science project**.  
+This repository contains my **Leaving Cert Computer Science project**.
+
 The project focuses on **nature and the environment**, specifically on **wildfire risk detection**.
 
-The program reads environmental data (temperature and soil moisture) and calculates a **wildfire risk level** using a simple model. It can run either with **real data from a Micro:Bit** or using **simulated datasets**.
+The system reads **temperature and soil moisture data**, calculates a **wildfire risk level**, and visualises the results using graphs.
+
+The program can run in two modes:
+
+- **Real-Time Mode** → Uses live data from a **Micro:Bit**
+- **Simulation Mode** → Uses predefined datasets
 
 ---
 
-# Running the Program
+# 🚀 Running the Program
 
-The main program is **`wildfire_risk`**.
+The main program is **`wildfire_risk.py`**.
 
-- If you run it directly from a **terminal or IDE**, it starts in **Real-Time mode**.
-- **Simulation mode** can only be selected when running from the **terminal**.
+Running the program directly will start it in **Real-Time Mode** by default.  
+You can change behaviour using command-line arguments.
 
-## Command Line Arguments
+---
+
+## ⚙️ Command Line Arguments
 
 ```
-python wildfire_risk.py [options]
+./wildfire_risk.py [options]
 ```
-
-Available options:
 
 | Argument | Description |
 |--------|-------------|
-| `-m`, `--mode` | Select the mode: `realtime` or `simulation` (default: `realtime`) |
-| `-tu`, `--time_units` | Time units for interval and save operations: `hours`, `minutes`, `seconds` |
+| `-m`, `--mode` | Select mode: `realtime` or `simulation` (default: `realtime`) |
+| `-tu`, `--time_units` | Time units: `hours`, `minutes`, `seconds` |
 | `-d`, `--dataset` | Dataset file used in simulation mode |
-| `-i`, `--interval` | Sampling interval (default: `30`) |
+| `-i`, `--interval` | Sampling interval |
 | `-s`, `--savefig` | Interval for saving graph images |
 | `-v`, `--verbose` | Enable verbose output |
 
-Example:
+---
+
+### Example — Real-Time Mode
 
 ```
-python wildfire_risk.py -m simulation -d dataset1.csv
+./wildfire_risk.py --mode realtime --interactive 5 --savefig 10 --time_units minutes
 ```
+
+This example:
+
+- Runs the program in **real-time**
+- Updates every **5 minutes**
+- Saves graph images every **10 minutes**
 
 ---
 
-# Program Workflow
+### Example — Simulation Mode
 
-In **Real-Time mode**, the system operates in the following sequence:
+```
+./wildfire_risk.py --mode simulation --dataset Input/01_dataset_high_risk.csv
+```
+
+This example runs the model using a **dataset instead of real sensor data**.
+
+---
+
+# 🧠 Program Workflow
+
+The project follows the **Observer Design Pattern**.
+
+- **SerialReader** acts as the **Subject**
+- **DataManagerCSV** and **MultiAxesGraph** act as **Observers**
+
+Whenever new data is received, the **Subject notifies the Observers**, which then store and visualise the data.
+
+---
+
+## Real-Time Mode Workflow
+
+```
+                +----------------+
+                | wildfire_risk  |
+                +--------+-------+
+                         |
+                         v
+                +----------------+
+                |  SerialReader  |  (Subject)
+                +--------+-------+
+                         |
+              Notify Observers
+                /             \
+               v               v
+   +----------------+   +----------------+
+   | DataManagerCSV |   | MultiAxesGraph |
+   |   (Observer)   |   |   (Observer)   |
+   +----------------+   +----------------+
+```
+
+**Responsibilities**
+
+- **SerialReader**
+  - Reads sensor data from the Micro:Bit through USB serial
+  - Generates new records
+
+- **DataManagerCSV**
+  - Stores records in a CSV database
+
+- **MultiAxesGraph**
+  - Displays the data using **Matplotlib**
+
+---
+
+## Simulation Mode Workflow
+
+Simulation mode is simpler because it uses **predefined datasets**.
 
 ```
 wildfire_risk
-   ↓
-SerialReader
-   ↓
-DataManagerCSV
-   ↓
-MultiAxesGraph
+      ↓
+DataSetReader
 ```
 
-1. **SerialReader** receives data from the Micro:Bit through USB serial.
-2. **DataManagerCSV** stores and retrieves records from a CSV database.
-3. **MultiAxesGraph** visualises the collected data using graphs.
+`DataSetReader` reads the dataset and generates the graph.
 
 ---
 
-# Project Structure
+# 📂 Project Structure
 
-The project is divided into modules and directories to keep the code organised and encapsulate functionality.
+The program is organised into modules to keep the design **clean, modular, and maintainable**.
+
+---
 
 ## Databases
 
-Contains **`DataManagerCSV`**, responsible for:
+Contains **`DataManagerCSV`**, which manages the CSV database.
 
-- Reading data from a CSV file
-- Writing new records to the database
+Responsibilities:
+
+- Reading stored data
+- Writing new records
 
 ---
 
 ## Graph
 
-Contains **`MultiAxesGraph`**, used by the main program to display graphs using **Matplotlib**.
+Contains **`MultiAxesGraph`**, which visualises the collected data using **Matplotlib**.
 
-Note:  
-`AnalogGraph` and `DigitalGraph` are included but not used.  
+Note:
+
+`AnalogGraph` and `DigitalGraph` remain in the directory but are not used.  
 They were part of an earlier design before the graph system was redesigned.
 
 ---
 
 ## Input
 
-This directory stores datasets used in **simulation mode**.
+This directory stores **datasets used for simulation mode**.
 
-The first four datasets correspond to these *What-If* scenarios:
+The first four datasets correspond to the following **What-If scenarios**:
 
-1. High temperatures and **low soil moisture**
-2. Low temperatures and **high soil moisture**
-3. Mild temperatures and **high soil moisture**
-4. Mild temperatures and **low soil moisture**
+| Dataset | Scenario |
+|-------|---------|
+| Dataset 1 | High temperature + low soil moisture |
+| Dataset 2 | Low temperature + high soil moisture |
+| Dataset 3 | Mild temperature + high soil moisture |
+| Dataset 4 | Mild temperature + low soil moisture |
 
-You can add more datasets here and run them in **simulation mode**.
+You can add additional datasets to test other conditions.
 
 ---
 
@@ -101,113 +172,140 @@ You can add more datasets here and run them in **simulation mode**.
 
 This directory contains the code used by the **Micro:Bit**.
 
-It includes:
+Included files:
 
 - A **Python sample**
-- Two ready-to-use `.hex` files
+- Two ready-to-use `.hex` firmware files
 
 ### Hex Files
 
 **microbit-test-at-home.hex**
 
-- Moisture detected when level **> 30**
+- Moisture detected when value **> 30**
 
 **microbit-Wildfire-Risk-Detection.hex**
 
-- Moisture detected when level **> 300**
+- Moisture detected when value **> 300**
 
-The difference between these files is the **moisture threshold used to detect moisture**.
+The difference between them is the **moisture threshold used to detect moisture**.
 
 ---
 
-## Model
+# 🌡️ Wildfire Risk Model
 
-This directory contains the **wildfire risk model**.
+The wildfire risk model uses **two inputs**:
 
-For simplicity, the model uses:
+- **Temperature** (analog value in °C)
+- **Moisture presence** (digital value)
 
-- **Temperature** (analog input)
-- **Moisture presence** (digital input)
+Although soil moisture is normally better measured as an **analog value**, the project requirements required it to be used as a **digital input**.
 
-Although measuring soil moisture as an **analog value** would provide higher accuracy, the project requirements required using a **digital value**.
+---
 
-### Model Calculation
+## Model Calculation
 
-Inputs:
+### 1️⃣ Temperature Factor
 
-- Temperature \(T\) in °C
-- Moisture presence \(M\) (True / False)
+The temperature factor is calculated and **clamped between 0 and 1**.
 
-Step 1 – Temperature Factor:
-
-\[
+```latex
 T_f = \text{clamp}\left(\frac{T - 10}{30}, 0, 1\right)
-\]
+```
 
-Step 2 – Moisture Factor:
+Where:
 
-\[
+- \(T\) = temperature in °C
+
+---
+
+### 2️⃣ Moisture Factor
+
+```latex
 M_f =
 \begin{cases}
-0.6 & \text{if moisture present} \\
-1.0 & \text{if dry}
+0.6 & \text{if moisture is present} \\
+1.0 & \text{if the environment is dry}
 \end{cases}
-\]
+```
 
-Step 3 – Wildfire Risk:
+Dry conditions increase wildfire risk.
 
-\[
+---
+
+### 3️⃣ Final Wildfire Risk
+
+```latex
 Risk = T_f \times M_f \times 100
-\]
+```
 
-The resulting value is converted into a **risk category**:
+The result is expressed as a **percentage risk value**.
 
-- Low
-- Moderate
-- High
-- Very High
+---
 
-The model returns **both the percentage risk and the risk level**.
+### 4️⃣ Risk Classification
+
+The model converts the percentage into four categories:
+
+- **Low**
+- **Moderate**
+- **High**
+- **Very High**
+
+The program returns **both the percentage and the risk level**.
 
 ---
 
 ## Output
 
-This directory stores **all images generated by the program**.
+All images produced by the program are saved in this directory.
 
-Files are saved using the format:
+File names follow the format:
 
 ```
 YYMMDD_HMS
 ```
 
-This format automatically sorts images **chronologically**.
+This automatically sorts images **chronologically**.
 
 ---
 
 ## Tools
 
-This directory contains reusable tools that could be used in other projects.
+This directory contains utilities that can potentially be reused outside the project.
 
 ### SerialReader
-Communicates with the **Micro:Bit via USB serial**, generates new records, and sends them to the wildfire model.
+Communicates with the **Micro:Bit via USB serial**, creates records, and sends data to the wildfire model.
 
 ### DataCollector
-An older version of the data collection system used before the final implementation with the **Observer Design Pattern**.
+An **older data collection system** used before implementing the **Observer Design Pattern**.
 
 ### DataSetReader
 Reads datasets and generates graphs during **simulation mode**.
 
 ---
 
-## What-If Simulation Output
+# 📊 What-If Simulation Output
 
-This directory contains **six example graphs generated by the program**.
+This directory contains **six graphs generated by the program**.
 
-- Two graphs are **random simulations**
-- One is an **extreme edge case** where temperature changes abruptly
-- The other **four graphs correspond to the four What-If scenarios**
+### Random simulations
 
-These graphs demonstrate how the wildfire risk model behaves under different environmental conditions.
+1. Random dataset simulation  
+2. Extreme edge case where **temperature changes abruptly**
+
+---
+
+### What-If scenario simulations
+
+The remaining four graphs correspond to the **What-If datasets**:
+
+| Scenario | Description |
+|--------|-------------|
+| What-If 1 | High temperature + low soil moisture |
+| What-If 2 | Low temperature + high soil moisture |
+| What-If 3 | Mild temperature + high soil moisture |
+| What-If 4 | Mild temperature + low soil moisture |
+
+These graphs demonstrate how the wildfire risk model reacts to different environmental conditions.
 
 ---
