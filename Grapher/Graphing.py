@@ -1,8 +1,8 @@
 from abc import abstractmethod
-from Tools.ObserverDesignPattern import Observer
+from Tools.ObserverDesignPattern import GraphObserver
 
 
-class MatplotlibGraph(Observer):
+class MatplotlibGraph(GraphObserver):
     @abstractmethod
     def new_record(self, record):
         pass
@@ -12,7 +12,7 @@ class MatplotlibGraph(Observer):
         pass
 
     @abstractmethod
-    def show(self, record=None, can_save:bool=False):
+    def show(self, record=None, can_save: bool = False):
         pass
 
     @staticmethod

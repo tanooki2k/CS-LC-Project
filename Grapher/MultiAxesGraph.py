@@ -17,6 +17,7 @@ class MultiAxesGraph(MatplotlibGraph):
             raise AttributeError(f"Fieldnames must have 4 element, just {len(fieldnames)} has been provided.")
 
         self._fig, self.ax1 = plt.subplots()
+        self.ax1.tick_params(axis="x", rotation=45)
         self._ax2 = self.ax1.twinx()
         self._fieldnames = fieldnames
         self._verbose = verbose
@@ -100,7 +101,7 @@ class MultiAxesGraph(MatplotlibGraph):
             self.save(output_dir)
         else:
             plt.show()
-        plt.close()
+        # plt.close()
 
     def update(self, new_record: Dict[str, Any]):
         self.new_record(new_record)

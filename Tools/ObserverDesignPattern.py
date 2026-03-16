@@ -38,3 +38,21 @@ class Observer(ABC):
         """
         pass
 
+class GraphObserver(Observer):
+    """
+    The Observer interface declares the update method, used by subjects.
+    """
+
+    @abstractmethod
+    def update(self, new_record: Dict[str, Any]) -> None:
+        """
+        Receive update from subject.
+        """
+        pass
+
+    @abstractmethod
+    def show(self, can_save: bool = False, path:str =""):
+        """
+        Save graph plotted.
+        """
+        pass
