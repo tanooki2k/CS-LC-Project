@@ -1,0 +1,8 @@
+The first four datasets responds to following WHat-if questions respectively:
+    - What if high temperatures and low soil moisture?
+    - What if low temperatures and high soil moisture?
+    - What if mild temperatures and high soil moisture?
+    - What if mild temperatures and low soil moisture?
+
+You can add many more cases here as a facility and the execute the app on
+simulation mode and select any other new dataset.
