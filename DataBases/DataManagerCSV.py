@@ -54,7 +54,24 @@ class DataManagerCSV(FileManager):
     
     def delete(self):
         pass
-    
+
+
+def process_value(value: str, is_digital: bool, first_value):
+    from Tools.DatetimeFunctions import convert_to_hours, subtract_date
+
+    if is_digital:
+        if value not in ["True", "False"]:
+            return bool(float(value))
+        elif value == "True":
+            return True
+        else:
+            return False
+
+    elif is_digital is None:
+        return convert_to_hours(subtract_date(value, first_value))
+    else:
+        return int(float(value))
+
 
 if __name__ == "__main__":
     from datetime import datetime

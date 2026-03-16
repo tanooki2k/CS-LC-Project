@@ -1,7 +1,7 @@
 from typing import List
 from Grapher.MultiAxesGraph import MultiAxesGraph
-from DataBases.DataManagerCSV import DataManagerCSV
-from Tools.DatetimeFunctions import convert_to_date, convert_to_hours, subtract_date
+from DataBases.DataManagerCSV import DataManagerCSV, process_value
+from Tools.DatetimeFunctions import convert_to_date
 
 
 def read_dataset(path: str, is_digital: List[bool], is_verbose: bool = False):
@@ -25,7 +25,7 @@ def read_dataset(path: str, is_digital: List[bool], is_verbose: bool = False):
     first_date = convert_to_date(raw_data[0][fieldnames[0]])
     data = [
         {
-            key: bool(float(val)) if is_digital[i] else int(float(val)) if is_digital[i] is not None else convert_to_hours(subtract_date(val, first_date))
+            key: process_value(val, is_digital[i], first_date)
             for i, (key, val) in enumerate(d.items())
         }
         for d in raw_data
