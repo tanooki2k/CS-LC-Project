@@ -68,6 +68,7 @@ class SerialReader(Subject):
                     print(f"Received record: {data_str}")
                     print(f"There is a {risk_level} wildfire risk ({int(risk_perc)}%)")
                     self.notify(final_record)
+                    self.serial.write(f"{risk_level}\n".encode())
 
             if self.graph_period is None:
                 continue
@@ -86,12 +87,13 @@ class SerialReader(Subject):
 
         while True:
             line = self.serial.readline().decode(errors="ignore").strip()
-            delta = (time.time() - start_time) % self.serial_period
-            if delta < self.serial_epsilon or delta > self.serial_period - self.serial_epsilon:
+            delta = time.time() - start_time
+            if delta < self.serial_period:
                 if re.search(self.expr, line):
                     data = [bool(int(num)) if self.__is_digital[i + 1] else int(num) for i, num in enumerate(line.split(","))]
                     raw_record.append(data)
             else:
+                start_time = time.time()
                 if raw_record:
                     if self.__verbose:
                         print(f"Raw Input read: {raw_record}")
