@@ -1,7 +1,8 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from Tools.ObserverDesignPattern import Observer
 
 
-class FileManager(ABC):
+class FileManager(Observer):
     @abstractmethod
     def create(self):
         pass

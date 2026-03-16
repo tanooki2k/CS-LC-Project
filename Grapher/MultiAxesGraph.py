@@ -12,23 +12,25 @@ class MultiAxesGraph(MatplotlibGraph):
     __RISK_TAG = "Risk (0% - 100%)"
     __min_temp_ax, __max_temp_ax = 10, 40
 
-    def __init__(self, fieldnames: List[str], data: List[Dict[str, Any]] = None) -> None:
+    def __init__(self, fieldnames: List[str], data: List[Dict[str, Any]] = None, verbose: bool = False) -> None:
         if len(fieldnames) != 4:
             raise AttributeError(f"Fieldnames must have 4 element, just {len(fieldnames)} has been provided.")
 
-        self.fig, self.ax1 = plt.subplots()
-        self.ax2 = self.ax1.twinx()
-        self.fieldnames = fieldnames
+        self._fig, self.ax1 = plt.subplots()
+        self._ax2 = self.ax1.twinx()
+        self._fieldnames = fieldnames
+        self._verbose = verbose
 
         self.ax1.set_ylim(self.__min_temp_ax - 2.5, self.__max_temp_ax + 2.5)
-        self.ax2.set_ylim(-2.5, 102.5)
+        self._ax2.set_ylim(-2.5, 102.5)
 
         self.ax1.set_xlabel(self.__TIME_TAG)
         self.ax1.set_ylabel(self.__TEMP_TAG)
-        self.ax2.set_ylabel(self.__RISK_TAG)
+        self._ax2.set_ylabel(self.__RISK_TAG)
 
-        for record in data:
-            self.new_record(record)
+        if data is not None:
+            for record in data:
+                self.new_record(record)
 
     def adjust_temp_axis(self, new_temp):
         if new_temp > self.__max_temp_ax:
@@ -36,7 +38,7 @@ class MultiAxesGraph(MatplotlibGraph):
         elif new_temp < self.__min_temp_ax:
             self.__min_temp_ax = new_temp
 
-    def new_record(self, record):
+    def new_record(self, record: Dict[str, Any]):
         if len(record) != 4:
             raise ValueError("Argument list `record` must have length 4")
 
@@ -52,7 +54,7 @@ class MultiAxesGraph(MatplotlibGraph):
         self.ax1.set_ylim(self.__min_temp_ax - 2.5, self.__max_temp_ax + 2.5)
 
         temp_line, = self.ax1.plot(self.time, self.temp, label=self.__TEMP_TAG, color="orange")
-        risk_line, = self.ax2.plot(self.time, self.risk, label=self.__RISK_TAG, color="blue")
+        risk_line, = self._ax2.plot(self.time, self.risk, label=self.__RISK_TAG, color="blue")
 
         time_true, time_false, temp_true, temp_false = [], [], [], []
         for i, m in enumerate(self.moist):
@@ -99,6 +101,9 @@ class MultiAxesGraph(MatplotlibGraph):
         else:
             plt.show()
         plt.close()
+
+    def update(self, new_record: Dict[str, Any]):
+        self.new_record(new_record)
 
     @staticmethod
     def save(path):

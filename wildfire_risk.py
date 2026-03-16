@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
-from serial.serialutil import SerialException
+from argparse import Namespace
+
 from Tools.SerialReader import SerialReader
+from DataBases.DataManagerCSV import DataManagerCSV, process_data
+from Grapher.MultiAxesGraph import MultiAxesGraph
 from Tools.DataSetReader import read_dataset
 
 
@@ -51,22 +54,45 @@ def main():
     print(f"Sampling interval: {args.interval} hours")
 
     if args.mode == "realtime":
+        fieldnames = ["utc", "temperature", "moisture", "risk"]
+        is_digital = [None, False, True, False]
+
         try:
-            serial_reader = SerialReader(10, 4, [("utc", False), ("temperature", False), ("moisture", True), ("risk", False)], r"^[0-9]+,[0-9]+$", args.verbose)
+            serial_reader = SerialReader(period=10, epsilon=4, fieldnames=list(zip(fieldnames, is_digital)), expr=r"^[0-9]+,[0-9]+$", verbose=args.verbose)
         except ValueError:
             print("The embedded system (micro:bit) has not been connected.")
         else:
             print("The program has been initialised as RealTime mode. Press CTRL+C to quit.")
+            if args.verbose:    print("Database is being initialised...")
+            database = DataManagerCSV(path="data.csv", fieldnames=fieldnames, verbose=args.verbose)
+
+            print("Reading database previous records...")
+            read_data = database.read()
+            data = None
+            if len(read_data):
+                print("Processing data...")
+                data = process_data(read_data=read_data, fieldnames=fieldnames, is_digital=is_digital)
+
+            if args.verbose:    print("Grapher is being initialised...")
+            grapher = MultiAxesGraph(fieldnames=fieldnames, data=data, verbose=args.verbose)
+
+            serial_reader.attach(observer=database)
+            serial_reader.attach(observer=grapher)
+
             serial_reader.read()
     else:
-        print("The program has been initialised as Simulation mode.")
-        print(f"Reading data from: {args.dataset}")
-        try:
-            read_dataset(args.dataset, [None, False, True, False], args.verbose)
-        except FileNotFoundError:
-            print("Your file has not been found, please, make sure that it exists!")
-        except ValueError:
-            print("Your file is empty, please, fill anything!")
+        start_simulation_mode(args)
+
+
+def start_simulation_mode(args: Namespace):
+    print("The program has been initialised as Simulation mode.")
+    print(f"Reading data from: {args.dataset}")
+    try:
+        read_dataset(path=args.dataset, is_digital=[None, False, True, False], verbose=args.verbose)
+    except FileNotFoundError:
+        print("Your file has not been found, please, make sure that it exists!")
+    except ValueError:
+        print("Your file is empty, please, fill anything!")
 
 
 if __name__ == "__main__":

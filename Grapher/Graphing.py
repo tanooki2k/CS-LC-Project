@@ -1,6 +1,8 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from Tools.ObserverDesignPattern import Observer
 
-class MatplotlibGraph(ABC):
+
+class MatplotlibGraph(Observer):
     @abstractmethod
     def new_record(self, record):
         pass

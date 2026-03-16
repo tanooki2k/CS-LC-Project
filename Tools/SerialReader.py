@@ -1,6 +1,6 @@
 from statistics import median
 from threading import Thread
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any
 from queue import Queue
 import datetime
 import time
@@ -8,11 +8,12 @@ import re
 import serial
 import mb_detect
 from Model.wildfire_risk import calculate_wildfire_risk
+from Tools.ObserverDesignPattern import Subject, Observer
 
 
-class SerialReader:
+class SerialReader(Subject):
     raw_data = Queue()
-    processed_data = Queue()
+    _observers: List[Observer] = []
 
     def __init__(self, period: float, epsilon: float, fieldnames: List[Tuple[str, bool]], expr: str, verbose: bool = False):
         port = mb_detect.find()
@@ -28,6 +29,12 @@ class SerialReader:
         self.__fieldnames = [k for k, _ in fieldnames]
         self.__verb = verbose
 
+    def attach(self, observer: Observer):
+        self._observers.append(observer)
+
+    def notify(self, new_record: Dict[str, Any]):
+        for observer in self._observers:
+            observer.update(new_record)
 
     def process_data(self) -> None:
         while True:
@@ -43,10 +50,10 @@ class SerialReader:
                     process_record.append(int(risk_perc))
 
                     final_record =  {key: value for key, value in zip(self.__fieldnames, process_record)}
-                    self.processed_data.put(final_record)
                     data_str = ", ".join([f"{f}: {final_record[f]}" for f in self.__fieldnames])
                     print(f"Received record: {data_str}")
                     print(f"There is a {risk_level} wildfire risk ({int(risk_perc)}%)")
+                    self.notify(final_record)
 
 
     def read(self):

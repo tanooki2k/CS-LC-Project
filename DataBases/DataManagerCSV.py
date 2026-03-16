@@ -5,43 +5,44 @@ from DataBases.FileManager import FileManager
 
 
 class DataManagerCSV(FileManager):
-    def __init__(self, path: str, fieldnames: List[str]):
+    def __init__(self, path: str, fieldnames: List[str], verbose: bool = False):
         self.__path = path
         self.__fieldnames = fieldnames
-        
+        self._verbose = verbose
+
         if not os.path.exists(path):
             self.create()
         else:
             fieldnames_stored = self.read_fieldnames()
             if fieldnames_stored != self.__fieldnames:
                 raise ValueError(f"The fieldnames provided does not match with the CSV fieldnames!")
-            
+
     def __repr__(self):
         return f"<DataManagerCSV path: `{self.__path}`, fieldnames:`{self.__fieldnames}`>"
-    
+
     def create(self):
         with open(self.__path, "w") as csv_file:
             reader = DictWriter(csv_file, fieldnames=self.__fieldnames)
             reader.writeheader()
-    
+
     def read(self):
         with open(self.__path) as csv_file:
             reader = DictReader(csv_file)
             data = list(reader)
         return data
-    
+
     def read_fieldnames(self):
         with open(self.__path) as file:
             reader = file.readline()
         fieldnames = [key.replace("\n", "") for key in reader.split(",")]
         return fieldnames
-    
+
     def write(self, *records: Dict[str, Any], validate: bool = True) -> Union[None, List[Tuple[int, int]]]:
         valid_data = []
 
         with open(self.__path, "a") as csv_file:
             writer = DictWriter(csv_file, fieldnames=self.__fieldnames)
-            
+
             for r in records:
                 if list(r.keys()) == self.__fieldnames:
                     if validate:
@@ -51,9 +52,12 @@ class DataManagerCSV(FileManager):
 
             if validate: return valid_data
             return None
-    
+
     def delete(self):
         pass
+
+    def update(self, new_record: Dict[str, Any]):
+        self.write(new_record)
 
 
 def process_value(value: str, is_digital: bool, first_value):
@@ -73,6 +77,25 @@ def process_value(value: str, is_digital: bool, first_value):
         return int(float(value))
 
 
+def process_records(read_data: List[Dict[str, str]], first_date, is_digital: List[bool]):
+    return [
+        {
+            key: process_value(val, is_digital[i], first_date)
+            for i, (key, val) in enumerate(d.items())
+        }
+        for d in read_data
+    ]
+
+
+def process_data(read_data: List[Dict[str, str]], fieldnames: List[str], is_digital: List[bool]):
+    from Tools.DatetimeFunctions import convert_to_date
+
+    first_date = convert_to_date(read_data[0][fieldnames[0]])
+    data = process_records(read_data, first_date, is_digital)
+
+    return data
+
+
 if __name__ == "__main__":
     from datetime import datetime
     from random import randint
@@ -82,7 +105,8 @@ if __name__ == "__main__":
     now = datetime.now()
     formatted = now.strftime("%Y-%m-%d %H:%M:%S")
 
-    record = {"timestamp": formatted, "temperature": randint(10, 40), "moisture": randint(0, 1), "risk": randint(0, 100)}
+    record = {"timestamp": formatted, "temperature": randint(10, 40), "moisture": randint(0, 1),
+              "risk": randint(0, 100)}
     database.write(record)
     print(database.read())
     print(database)

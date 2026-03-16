@@ -1,10 +1,9 @@
 from typing import List
 from Grapher.MultiAxesGraph import MultiAxesGraph
-from DataBases.DataManagerCSV import DataManagerCSV, process_value
-from Tools.DatetimeFunctions import convert_to_date
+from DataBases.DataManagerCSV import DataManagerCSV, process_data
 
 
-def read_dataset(path: str, is_digital: List[bool], is_verbose: bool = False):
+def read_dataset(path: str, is_digital: List[bool], verbose: bool = False):
     with open(path) as file:
         fieldnames = [key.replace("\n", "") for key in file.readline().split(",")]
 
@@ -14,23 +13,16 @@ def read_dataset(path: str, is_digital: List[bool], is_verbose: bool = False):
         fieldnames=fieldnames,
     )
 
-    raw_data = collector.read()
-    if is_verbose:
-        print(*raw_data, sep="\n")
+    read_data = collector.read()
+    if verbose:
+        print(*read_data, sep="\n")
 
-    if not len(raw_data):
+    if not len(read_data):
         raise ValueError("No data has been found!")
 
-    print("Processing data")
-    first_date = convert_to_date(raw_data[0][fieldnames[0]])
-    data = [
-        {
-            key: process_value(val, is_digital[i], first_date)
-            for i, (key, val) in enumerate(d.items())
-        }
-        for d in raw_data
-    ]
-    if is_verbose: print(*data, sep="\n")
+    print("Processing data...")
+    data = process_data(read_data=read_data, fieldnames=fieldnames, is_digital=is_digital)
+    if verbose: print(*data, sep="\n")
 
     print("Initialising graph...")
     graph = MultiAxesGraph(
